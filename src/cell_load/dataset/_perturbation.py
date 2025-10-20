@@ -370,11 +370,19 @@ class PerturbationDataset(Dataset):
                 gene_codes = self.h5_file["var/gene_name/codes"][:]
                 gene_categories = self.h5_file["var/gene_name/categories"][:]
                 raw = gene_categories[gene_codes]
+
+            # [Sunil] For CZI schema, access gene-symbols from adata.var["gene_symbol"]
+            elif "var/gene_symbol" in self.h5_file:
+
+                decoded_gene_names = [_decode(x) for x in self.h5_file["var/gene_symbol"]]
+                return decoded_gene_names
+
             else:
                 try:
                     raw = self.h5_file["var/gene_name"][:]
                 except:
                     raw = self.h5_file["var/gene_name_index"][:]
+
             if (
                 output_space == "gene"
                 and "highly_variable" in self.h5_file["/var"].keys()
@@ -386,7 +394,9 @@ class PerturbationDataset(Dataset):
                 if uns_key in self.h5_file:
                     hvg_names = self.h5_file[uns_key][:].astype(str)
                     raw = hvg_names
+
             return [_decode(x) for x in raw]
+
         except KeyError:
             try:
                 cats = self.h5_file["var/gene_name/categories"][:]
