@@ -7,6 +7,10 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, Subset
 
+# [Sunil] Add support for reading zstd compressed files
+# noinspection PyUnresolvedReferences
+import hdf5plugin
+
 from ..mapping_strategies import BaseMappingStrategy
 from ..utils.data_utils import (
     GlobalH5MetadataCache,

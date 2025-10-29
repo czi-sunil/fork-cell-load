@@ -7,6 +7,11 @@ from pathlib import Path
 from typing import Literal, Set, Dict
 
 import h5py
+
+# [Sunil] Add support for reading zstd compressed files
+# noinspection PyUnresolvedReferences
+import hdf5plugin
+
 import numpy as np
 import torch
 from lightning.pytorch import LightningDataModule
@@ -408,8 +413,15 @@ class PerturbationDataModule(LightningDataModule):
             files = self._find_dataset_files(dataset_path)
 
             for _fname, fpath in files.items():
+                # [Sunil] Added
+                logger.info(f"Processing {fpath}")
                 with h5py.File(fpath, "r") as f:
-                    pert_arr = f[f"obs/{self.pert_col}/categories"][:]
+                    try:
+                        pert_arr = f[f"obs/{self.pert_col}/categories"][:]
+                    except KeyError as e:
+                        logger.error(f"Error reading {self.pert_col=}")
+                        raise e
+
                     perts = set(safe_decode_array(pert_arr))
                     all_perts.update(perts)
 

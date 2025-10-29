@@ -51,6 +51,9 @@ class PerturbationBatchSampler(Sampler):
         self.seed = seed
         self.epoch = epoch
 
+        # [Sunil] Added
+        logger.info(f"Sampler params: {batch_size=}, {cell_sentence_len=}")
+
         if self.test and self.batch_size != 1:
             logger.warning(
                 "Batch size should be 1 for test mode. Setting batch size to 1."

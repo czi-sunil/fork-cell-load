@@ -7,6 +7,8 @@ import numpy as np
 import scipy.sparse as sp
 import torch
 
+import hdf5plugin   # [Sunil] Added, to support zstd compression
+
 from .singleton import Singleton
 
 log = logging.getLogger(__name__)
