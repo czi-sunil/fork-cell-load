@@ -56,26 +56,62 @@ test = ["GENE3", "GENE4"]
 #### TOML Configuration Format
 
 **`[datasets]`**: Maps dataset names to their directory paths
-- Each dataset should contain H5 files (one per cell type)
-- Files should be named like `cell_type.h5` or `cell_type.h5ad`
 
-**`[training]`**: Specifies which datasets are used for training
+* Each dataset should contain H5 files (one per cell type)
+* Files should be named like `cell_type.h5` or `cell_type.h5ad`
+
+
+**`[training]`**: Specifies which datasets are used for training  
+
 - Set to `"train"` to include all cell types in training (except those in zeroshot/fewshot)
 
-**`[zeroshot]`**: Holds out entire cell types for testing
+
+**`[zeroshot]`**: Holds out entire cell types for testing  
+
 - Format: `"dataset.cell_type" = "split"`
-- Split can be `"val"` or `"test"`
+- Only one Split allowed. It can be `"val"` or `"test"`.
 - Example: `"replogle.jurkat" = "test"` holds out all Jurkat cells from training
 
-**`[fewshot]`**: Holds out specific perturbations within cell types
+
+**`[fewshot]`**: Holds out specific perturbations within cell types  
+
 - Format: `[fewshot."dataset.cell_type"]`
 - `val = ["pert1", "pert2"]`: Perturbations for validation
 - `test = ["pert3", "pert4"]`: Perturbations for testing
+- `test = "_rest_"`: All non-control perturbations not in `"val"` are designated as `"test"`.
 - Remaining perturbations go to training
 
-It is worth noting that control cell mapping is only done withi the same file (e.g., 
+
+It is worth noting that control cell mapping is only done within the same file (e.g., 
 a perturbed cell will not get mapped to a control cell from a different h5 file, even
 if it has matched covariates).
+
+
+### Example using pre-split files
+
+In this example, Cell-type `"CT_1"` is split into Training and Test, using a simple stratified split across all perturbations. Since this uses stratified splits, two of the non-control perturbations from `CT_1_test` are used for Validation, with the actual Few-shot Test set comprising the remaining perturbations.
+
+All the cells from Cell-type `"CT_2"` are used for training.
+
+```
+[datasets]
+CT_1_trng = "/path/to/datadir/CT_1_trng.h5ad"
+CT_1_test = "/path/to/datadir/CT_1_test.h5ad"
+CT_2_all = "/path/to/datadir/CT_2_all.h5ad"
+
+[training]
+CT_1_trng = "train"
+CT_2_all = "train"
+
+[zeroshot]
+
+[fewshot]
+
+[fewshot."CT_1_test.CT_1"]
+val = ['pert_1', 'pert_2']
+test =  "_rest_"
+```
+
 
 ### 2. Command Line Usage
 

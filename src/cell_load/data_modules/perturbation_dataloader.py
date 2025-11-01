@@ -28,8 +28,21 @@ from ..utils.data_utils import (
 )
 from .samplers import PerturbationBatchSampler
 
+
+# ------------------------------------------------------------------------------
+#   Globals
+# ------------------------------------------------------------------------------
+
 logger = logging.getLogger(__name__)
 
+
+IMPLICT_PERTURBATIONS_REST = "_rest_"
+"""Value in TOML for `test` to use all non-val perturbations."""
+
+
+# ------------------------------------------------------------------------------
+#   Classes
+# ------------------------------------------------------------------------------
 
 class PerturbationDataModule(LightningDataModule):
     """
@@ -415,7 +428,9 @@ class PerturbationDataModule(LightningDataModule):
             for _fname, fpath in files.items():
                 # [Sunil] Added
                 logger.info(f"Processing {fpath}")
+
                 with h5py.File(fpath, "r") as f:
+                    # [Sunil] enclosed with try .. except
                     try:
                         pert_arr = f[f"obs/{self.pert_col}/categories"][:]
                     except KeyError as e:
@@ -593,7 +608,16 @@ class PerturbationDataModule(LightningDataModule):
 
         # Create sets of perturbation codes for each split
         val_pert_names = set(pert_config.get("val", []))
-        test_pert_names = set(pert_config.get("test", []))
+
+        # [Sunil] Added support for implicit list
+        test_pert_names = pert_config.get("test", [])
+
+        if test_pert_names == IMPLICT_PERTURBATIONS_REST:
+            test_pert_names = (set(ds.metadata_cache.pert_categories.tolist())
+                               - set(val_pert_names) - {self.control_pert})
+        else:
+            test_pert_names = set(test_pert_names)
+        # ---
 
         val_pert_codes = set()
         test_pert_codes = set()
