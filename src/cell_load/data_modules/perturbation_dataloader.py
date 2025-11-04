@@ -6,6 +6,10 @@ from functools import partial
 from pathlib import Path
 from typing import Literal, Set, Dict
 
+# [Sunil] Add support for reading zstd compressed files
+# noinspection PyUnresolvedReferences
+import hdf5plugin
+
 import h5py
 
 # [Sunil] Add support for reading zstd compressed files
