@@ -27,7 +27,7 @@ The TOML configuration file defines your datasets, training splits, and experime
 # Dataset paths - maps dataset names to their directories
 [datasets]
 replogle = "/path/to/replogle_dataset/" # ADDS ALL h5 or h5ad files in this folder to training
-jurkat = "/path/to/jurkat_dataset/"
+jurkat = "${toml_dir}/jurkat_dataset/"
 
 # Training specifications
 # All cell types in a dataset automatically go into training (excluding zeroshot/fewshot overrides)
@@ -59,6 +59,13 @@ test = ["GENE3", "GENE4"]
 
 * Each dataset should contain H5 files (one per cell type)
 * Files should be named like `cell_type.h5` or `cell_type.h5ad`
+* Special string interpolation: Paths may contain the string `${toml_dir}`, e.g.
+
+	```
+	jurkat = "${toml_dir}/jurkat_dataset.h5ad"
+	```
+	
+	which refers to path relative to the location of the TOML file.
 
 
 **`[training]`**: Specifies which datasets are used for training  
@@ -89,27 +96,25 @@ if it has matched covariates).
 
 ### Example using pre-split files
 
-In this example, Cell-type `"CT_1"` is split into Training and Test, using a simple stratified split across all perturbations. Since this uses stratified splits, two of the non-control perturbations from `CT_1_test` are used for Validation, with the actual Few-shot Test set comprising the remaining perturbations.
-
-All the cells from Cell-type `"CT_2"` are used for training.
+The following example TOML file is for the VCC curated dataset. The `*_preprocessed.h5ad` files are created by calling `uv run state tx preprocess_splits ...`.
 
 ```
 [datasets]
-CT_1_trng = "/path/to/datadir/CT_1_trng.h5ad"
-CT_1_test = "/path/to/datadir/CT_1_test.h5ad"
-CT_2_all = "/path/to/datadir/CT_2_all.h5ad"
+vcc_trng = "${toml_dir}/adata_Training_curated_train70_sampledpertarget_preprocessed.h5ad"
+vcc_test = "${toml_dir}/adata_Training_curated_test30_sampledpertarget_preprocessed.h5ad"
 
 [training]
-CT_1_trng = "train"
-CT_2_all = "train"
+vcc_trng = "train"
 
 [zeroshot]
 
 [fewshot]
 
-[fewshot."CT_1_test.CT_1"]
-val = ['pert_1', 'pert_2']
-test =  "_rest_"
+[fewshot."vcc_trng.CVCL_9771"]
+
+[fewshot."vcc_test.CVCL_9771"]
+val = [ "TMSB4X", "PRCP", "TADA1", "HIRA", "IGF2R", "NCK2", "MED13", "MED12", "STAT1", "USP22", ]
+test = "_rest_"
 ```
 
 

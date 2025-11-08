@@ -601,6 +601,7 @@ class PerturbationDataModule(LightningDataModule):
         pert_config: dict[str, list[str]],
     ) -> dict[str, int]:
         """Split a fewshot cell type according to perturbation assignments."""
+
         counts = {"train": 0, "val": 0, "test": 0}
 
         # Get perturbation codes for this cell type
@@ -617,7 +618,7 @@ class PerturbationDataModule(LightningDataModule):
                                - set(val_pert_names) - {self.control_pert})
         else:
             test_pert_names = set(test_pert_names)
-        # ---
+        # [Sunil] end ---
 
         val_pert_codes = set()
         test_pert_codes = set()
@@ -673,6 +674,11 @@ class PerturbationDataModule(LightningDataModule):
     def _find_dataset_files(self, dataset_path: Path) -> dict[str, Path]:
         files: Dict[str, Path] = {}
         path_str = str(dataset_path)
+
+        # [Sunil] Interpolate "${toml_dir}"
+        if "${toml_dir}" in path_str:
+            path_str = path_str.replace("${toml_dir}", self.config.toml_dir)
+            dataset_path = Path(path_str)
 
         # Check if path contains glob patterns
         if any(char in path_str for char in "*?[]{}"):

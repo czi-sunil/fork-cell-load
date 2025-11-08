@@ -378,8 +378,7 @@ class PerturbationDataset(Dataset):
             # [Sunil] For CZI schema, access gene-symbols from adata.var["gene_symbol"]
             elif "var/gene_symbol" in self.h5_file:
 
-                decoded_gene_names = [_decode(x) for x in self.h5_file["var/gene_symbol"]]
-                return decoded_gene_names
+                raw = self.h5_file["var/gene_symbol"][:]
 
             else:
                 try:

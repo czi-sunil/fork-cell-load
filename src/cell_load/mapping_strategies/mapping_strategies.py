@@ -82,7 +82,7 @@ class BaseMappingStrategy(ABC):
 
     def get_mapped_expressions(
         self, dataset: "PerturbationDataset", split: str, perturbed_idx: int
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    ) -> Tuple[torch.Tensor, torch.Tensor, int | None]:         # [Sunil] Fixed return type
         """
         Base implementation where "perturbed_idx" confusingly refers to both control and perturbed cells.
 

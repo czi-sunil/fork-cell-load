@@ -1,6 +1,7 @@
 # src/cell_load/config.py
 import logging
 from dataclasses import dataclass
+import os
 from pathlib import Path
 from typing import Set
 
@@ -25,6 +26,10 @@ class ExperimentConfig:
     # Fewshot perturbation assignments (dataset.celltype -> {split: [perts]})
     fewshot: dict[str, dict[str, list[str]]]
 
+    # [Sunil] Added convenience fields
+    toml_path: str
+    toml_dir: str
+
     @classmethod
     def from_toml(cls, toml_path: str) -> "ExperimentConfig":
         """Load configuration from TOML file."""
@@ -36,6 +41,9 @@ class ExperimentConfig:
             training=config.get("training", {}),
             zeroshot=config.get("zeroshot", {}),
             fewshot=config.get("fewshot", {}),
+            # [Sunil] Added convenience fields
+            toml_path=toml_path,
+            toml_dir=os.path.abspath(os.path.dirname(toml_path)),
         )
 
     def get_all_datasets(self) -> Set[str]:
