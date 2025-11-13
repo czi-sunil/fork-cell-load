@@ -1,7 +1,6 @@
 # src/cell_load/config.py
 import logging
 from dataclasses import dataclass
-import os
 from pathlib import Path
 from typing import Set
 
@@ -26,9 +25,22 @@ class ExperimentConfig:
     # Fewshot perturbation assignments (dataset.celltype -> {split: [perts]})
     fewshot: dict[str, dict[str, list[str]]]
 
-    # [Sunil] Added convenience fields
-    toml_path: str
+    # [Sunil] Added. Location of dir containing the toml file
     toml_dir: str
+
+    def __post_init__(self):
+        """
+        [Sunil] Added support for using paths relative to location of TOML-FILE,
+        e.g.
+            [datasets]
+            HCT116_trng = "${toml_dir}/HCT116_filtered_dual_guide_cells_curated_train70_preprocessed.h5ad"
+            ...
+        """
+
+        for k in self.datasets:
+            if (dpath := self.datasets[k]).startswith("${toml_dir}"):
+                self.datasets[k] = dpath.replace("${toml_dir}", self.toml_dir)
+        return
 
     @classmethod
     def from_toml(cls, toml_path: str) -> "ExperimentConfig":
@@ -41,9 +53,7 @@ class ExperimentConfig:
             training=config.get("training", {}),
             zeroshot=config.get("zeroshot", {}),
             fewshot=config.get("fewshot", {}),
-            # [Sunil] Added convenience fields
-            toml_path=toml_path,
-            toml_dir=os.path.abspath(os.path.dirname(toml_path)),
+            toml_dir=str(Path(toml_path).parent),
         )
 
     def get_all_datasets(self) -> Set[str]:
